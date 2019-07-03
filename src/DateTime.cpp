@@ -1,5 +1,6 @@
 #include "DateTime.h"
 
+const char* TIMESTAMP_FORMAT = "%4d-%02d-%02d_%02d%02d%02d.%06d";
 const uint8_t DAYS_IN_MONTH[] PROGMEM = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 // number of days since 2000/01/01, valid for 2001..2099
@@ -254,6 +255,12 @@ int32_t DateTime::set_microseconds(int32_t micros) {
     }
     microseconds = micros;
     return seconds_offset;
+}
+
+void DateTime::generate_timestamp(char* output) {  // Tidy up the datetime generations
+    char buffer[strlen(TIMESTAMP_FORMAT)];
+    snprintf(buffer, strlen(TIMESTAMP_FORMAT), TIMESTAMP_FORMAT, year(), month(), day(), hour(), minute(), second());
+    strncpy(output, buffer, strlen(output));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

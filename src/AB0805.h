@@ -1,9 +1,13 @@
 #include <Arduino.h>
+#include <SPI.h>
 #include <Wire.h>
 #include "DateTime.h"
 
 #ifndef AB08x5_H
 #define AB08x5_H
+
+const uint8_t DEFAULT_ABO8x5_ADDRESS = 0x69;
+const uint8_t AB08x5_YEAR_OFFSET = 2000;
 
 enum AB08x5_HOUR_MODE {
     AB08x5_24_HOUR_MODE = 0,
@@ -134,23 +138,23 @@ enum AB08x5_TRICKLE_OUTPUT_RESISTANCE {
 typedef union {
     uint8_t raw;
     struct {
-        uint8_t exti_triggered : 1;
-        uint8_t wdi_triggered : 1;
-        uint8_t alarm_triggered : 1;
-        uint8_t countdown_reached : 1;
-        uint8_t vbat_crosses_bref : 1;
-        uint8_t watchdog_triggered : 1;
-        uint8_t battery_active : 1;
-        uint8_t century_flag : 1;  // Toggles when year rolls over from 99 to 0
+        uint8_t ext1_triggered : 1;      // External trigger detected on the EXTI pin
+        uint8_t ext2_triggered : 1;      // External interrupt triggered on the WDI pin
+        uint8_t alarm_triggered : 1;     // The timer counters matched the alarm registers. Subject to masking
+        uint8_t countdown_reached : 1;   // The countdown time has reached elapsed
+        uint8_t vbat_crosses_bref : 1;   // The battery voltage crossed the reference voltage in the defined direction
+        uint8_t watchdog_triggered : 1;  // The watchdog timer has been triggered
+        uint8_t battery_active : 1;      // The clock is operating on battery power as opposed to supply voltage
+        uint8_t century_flag : 1;        // Toggles when year rolls over from 99 to 0
     };
 } ab08x5_status_t;
 
 typedef union {
     uint8_t raw;
     struct {
-        uint8_t counter_write_enabled : 1;
+        uint8_t time_registers_write_enabled : 1;
         uint8_t _reserved1 : 1;
-        uint8_t auto_reset_enabled : 1;
+        uint8_t interrupt_reset_mode : 1;
         uint8_t _reserved2 : 1;
         uint8_t nirq_output : 1;
         uint8_t nirq2_output : 1;
@@ -176,7 +180,7 @@ typedef union {
         uint8_t alarm_interrupt_enabled : 1;
         uint8_t timer_interrupt_enabled : 1;
         uint8_t battery_low_interrupt_enabled : 1;
-        uint8_t interrupt_mode : 2;
+        uint8_t alarm_interrupt_output_mode : 2;
         uint8_t century_enabled : 1;
     };
 } ab08x5_interrupt_mask_t;
@@ -212,10 +216,10 @@ typedef union {
 typedef union {
     uint8_t raw;
     struct {
-        uint8_t interrupt_pulse_width : 2;
-        uint8_t alarm_trigger_mode : 3;
+        uint8_t timer_interrupt_pulse_width : 2;
+        uint8_t alarm_repeat_mode : 3;
         uint8_t timer_repeat : 1;
-        uint8_t interrupt_mode : 1;
+        uint8_t timer_interrupt_mode : 1;
         uint8_t timer_enable : 1;
     };
 } ab08x5_alarm_control_t;
@@ -285,7 +289,7 @@ typedef union {
 
 class AB08x5 {
    public:
-    bool begin(void);
+    bool begin(uint8_t comms_mode = AB08x5_I2C_MODE, uint8_t address_or_pin = DEFAULT_ABO8x5_ADDRESS);
     void write_oscillator_config();
     bool comm_check();
 
@@ -309,8 +313,10 @@ class AB08x5 {
 
     void set_alarm(DateTime& dt);
     DateTime read_alarm(DateTime& dt);
-    void enable_alarm();
+    void enable_alarm(uint8_t alarm_repeat_mode = AB08x5_ALARM_PER_SECOND);
     void disable_alarm();
+
+    DateTime get_last_update_time();
 
    private:
     typedef enum AB08x5_REGISTER {
@@ -363,21 +369,28 @@ class AB08x5 {
         I2C_ONLY_RAM = 0x80,
     } ab08x5_reg_t;
 
-    uint8_t comms_mode = AB08x5_I2C_MODE;
-    DateTime last_time_update;
+    uint8_t _comms_mode = AB08x5_I2C_MODE;
+    DateTime _last_time_update;
+    uint8_t _device_address = DEFAULT_ABO8x5_ADDRESS;
+    uint8_t _chip_select_pin = 0;
 
-    bool write();
-    bool read();
+    bool write(uint8_t* input, ab08x5_reg_t address, uint8_t length = 1);
+    bool read(uint8_t* output, ab08x5_reg_t address, uint8_t length = 1);
 
-    bool write_i2c();
-    bool read_i2c();
+    bool write_i2c(uint8_t* input, ab08x5_reg_t address, uint8_t length);
+    bool read_i2c(uint8_t* output, ab08x5_reg_t address, uint8_t length);
 
-    bool write_spi();
-    bool read_spi();
+    bool write_spi(uint8_t* input, ab08x5_reg_t address, uint8_t length);
+    bool read_spi(uint8_t* output, ab08x5_reg_t address, uint8_t length);
+
+    void unlock_time_registers();
+    void lock_time_registers();
 
     static void datetime_to_registers(DateTime& dt, uint8_t* output);
+    static void registers_to_datetime(DateTime& dt, uint8_t* input);
 };
-static uint8_t bcd_to_sbin(uint8_t val) { return val - 6 * (val >> 4); }
+
+static uint8_t bcd_to_bin(uint8_t val) { return val - 6 * (val >> 4); }
 static uint8_t bin_to_bcd(uint8_t val) { return val + 6 * (val / 10); }
 
 #endif

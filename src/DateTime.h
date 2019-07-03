@@ -29,6 +29,8 @@ class DateTime {
     uint32_t microsecond() const { return microseconds; }
     uint8_t day_of_the_week() const;
 
+    void generate_timestamp(char* output);
+
     // 32-bit times as seconds since 1/1/2000
     long seconds_time() const;
     // 32-bit times as seconds since 1/1/1970
