@@ -27,7 +27,7 @@ static long time_to_long(uint16_t days, uint8_t h, uint8_t m, uint8_t s) {
  * @param t: Total seconds since 1970-1-1
  * @param micros: microseconds since t
  */
-DateTime::DateTime(uint32_t t, int32_t micros = 0) {
+DateTime::DateTime(uint32_t t, int32_t micros) {
     t -= SECONDS_FROM_1970_TO_2000;  // bring to 2000 timestamp from 1970
 
     t += set_microseconds(micros);
@@ -291,7 +291,7 @@ TimeSpan::TimeSpan(int16_t days, int8_t hours, int8_t minutes, int8_t seconds, i
  */
 TimeSpan::TimeSpan(const TimeSpan& copy) {
     _seconds = copy.seconds();
-    _seconds += set_microseconds(copy.microseconds);
+    _seconds += set_microseconds(copy.microseconds());
 }
 
 /**

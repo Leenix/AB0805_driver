@@ -4,6 +4,7 @@ bool AB08x5::begin(uint8_t comms_mode, uint8_t address_or_pin) {
     _comms_mode = comms_mode;
     if (comms_mode == AB08x5_I2C_MODE) _device_address = address_or_pin;
     if (comms_mode == AB08x5_SPI_MODE) _chip_select_pin = address_or_pin;
+    return comm_check();
 }
 
 bool AB08x5::write(uint8_t *input, ab08x5_reg_t address, uint8_t length) {
@@ -119,20 +120,16 @@ ab08x5_osc_status_t AB08x5::get_oscillator_status() {
     return status;
 }
 
-void AB08x5::set_control_config(ab08x5_control_1_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1); }
+void AB08x5::write_config(ab08x5_control_1_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1); }
 
-void AB08x5::set_control_config(ab08x5_control_2_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2); }
+void AB08x5::write_config(ab08x5_control_2_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2); }
 
-void AB08x5::set_interrupt_mask(ab08x5_interrupt_mask_t config) {
-    write((uint8_t *)&config, AB08x5_REGISTER::INT_MASK);
-}
-void AB08x5::set_sqw_config(ab08x5_sqw_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::SQW); }
+void AB08x5::write_config(ab08x5_interrupt_mask_t config) { write((uint8_t *)&config, AB08x5_REGISTER::INT_MASK); }
+void AB08x5::write_config(ab08x5_sqw_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::SQW); }
 
-void AB08x5::set_watchdog_config(ab08x5_watchdog_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::WDT); }
+void AB08x5::write_config(ab08x5_watchdog_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::WDT); }
 
-void AB08x5::set_alarm_config(ab08x5_alarm_control_t config) {
-    write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL);
-}
+void AB08x5::write_config(ab08x5_alarm_control_t config) { write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL); }
 
 ab08x5_control_1_t AB08x5::get_control_config_1() {
     ab08x5_control_1_t config;
@@ -236,11 +233,25 @@ DateTime AB08x5::get_last_update_time() { return DateTime(_last_time_update); }
 void AB08x5::unlock_time_registers() {
     ab08x5_control_1_t config = get_control_config_1();
     config.time_registers_write_enabled = 1;
-    set_control_config(config);
+    write_config(config);
 }
 
 void AB08x5::lock_time_registers() {
     ab08x5_control_1_t config = get_control_config_1();
     config.time_registers_write_enabled = 0;
-    set_control_config(config);
+    write_config(config);
+}
+
+void AB08x5::enable_alarm_interrupts(uint8_t output_pin) {
+    // Map the alarm interrupt to nIRQ1
+    ab08x5_control_2_t config;
+    if (output_pin == AB08x5_NIRQ) config.nirq_mode = AB08x5_NIRQ_MODE_NAIRQ;
+    if (output_pin == AB08x5_NIRQ2) config.nirq2_mode = AB08x5_NIRQ_MODE_NAIRQ;
+    write_config(config);
+
+    // Set level interrupts for the alarm (low until cleared)
+    ab08x5_interrupt_mask_t int_mask;
+    int_mask.alarm_interrupt_output_mode = AB08x5_ALARM_INTERRUPT_MODE::AB08x5_INTERRUPT_LATCHED;
+    int_mask.alarm_interrupt_enabled = true;
+    write_config(int_mask);
 }

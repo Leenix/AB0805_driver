@@ -7,14 +7,17 @@
 #define AB08x5_H
 
 const uint8_t DEFAULT_ABO8x5_ADDRESS = 0x69;
-const uint8_t AB08x5_YEAR_OFFSET = 2000;
+const uint16_t AB08x5_YEAR_OFFSET = 2000;
 
 enum AB08x5_HOUR_MODE {
     AB08x5_24_HOUR_MODE = 0,
     AB08x5_12_HOUR_MODE = 1,
 };
 
-enum AB08x5_AUTO_RESET_MODE {
+/**
+ * Options for how interrupts are cleared.
+ */
+enum AB08x5_INTERRUPT_CLEAR_MODE {
     AB08x5_INT_CLEARED_ON_STATUS_READ = 1,            // Any read of the status register clears all interrupt flags
     AB08x5_INT_CLEARED_ON_EXPLICIT_STATUS_WRITE = 0,  // Interrupt flags are cleared by writing to the status register
 };
@@ -29,7 +32,7 @@ enum AB08x5_NIRQ_MODE {
     AB08x5_NIRQ_MODE_STATIC = 7,         // Static output as set by nirq2_output/OUTB in CONTROL_1
 };
 
-enum AB08x5_INTERRUPT_MODE {
+enum AB08x5_ALARM_INTERRUPT_MODE {
     AB08x5_INTERRUPT_LATCHED = 0,
     AB08x5_INTERRUPT_PULSE_MIN = 1,
     AB08x5_INTERRUPT_PULSE_16MS = 2,
@@ -134,6 +137,8 @@ enum AB08x5_TRICKLE_OUTPUT_RESISTANCE {
     AB08x5_TRICKLE_OUTPUT_RESISTANCE_6K = 2,
     AB08x5_TRICKLE_OUTPUT_RESISTANCE_11K = 3,
 };
+
+enum AB08x5_INTERRUPT_OUTPUT_PIN { AB08x5_NIRQ, AB08x5_NIRQ2 };
 
 typedef union {
     uint8_t raw;
@@ -296,12 +301,12 @@ class AB08x5 {
     ab08x5_status_t get_status();
     ab08x5_osc_status_t get_oscillator_status();
 
-    void set_control_config(ab08x5_control_1_t config);
-    void set_control_config(ab08x5_control_2_t config);
-    void set_interrupt_mask(ab08x5_interrupt_mask_t config);
-    void set_sqw_config(ab08x5_sqw_config_t config);
-    void set_watchdog_config(ab08x5_watchdog_config_t config);
-    void set_alarm_config(ab08x5_alarm_control_t config);
+    void write_config(ab08x5_control_1_t config);
+    void write_config(ab08x5_control_2_t config);
+    void write_config(ab08x5_interrupt_mask_t config);
+    void write_config(ab08x5_sqw_config_t config);
+    void write_config(ab08x5_watchdog_config_t config);
+    void write_config(ab08x5_alarm_control_t config);
 
     ab08x5_control_1_t get_control_config_1();
     ab08x5_control_2_t get_control_config_2();
@@ -315,6 +320,7 @@ class AB08x5 {
     DateTime read_alarm(DateTime& dt);
     void enable_alarm(uint8_t alarm_repeat_mode = AB08x5_ALARM_PER_SECOND);
     void disable_alarm();
+    void enable_alarm_interrupts(uint8_t output_pin = AB08x5_NIRQ);
 
     DateTime get_last_update_time();
 
