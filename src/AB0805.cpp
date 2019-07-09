@@ -1,12 +1,5 @@
 #include "AB0805.h"
 
-bool AB08x5::begin(uint8_t comms_mode, uint8_t address_or_pin) {
-    _comms_mode = comms_mode;
-    if (comms_mode == AB08x5_I2C_MODE) _device_address = address_or_pin;
-    if (comms_mode == AB08x5_SPI_MODE) _chip_select_pin = address_or_pin;
-    return comm_check();
-}
-
 bool AB08x5::write(uint8_t *input, ab08x5_reg_t address, uint8_t length) {
     bool success = false;
     if (_comms_mode == AB08x5_I2C_MODE) success = write_i2c(input, address, length);
@@ -99,6 +92,14 @@ bool AB08x5::read_spi(uint8_t *output, ab08x5_reg_t address, uint8_t length) {
 
     return result;
 }
+///////////////////////////////////////////////////////////////////////////////
+
+bool AB08x5::begin(uint8_t comms_mode, uint8_t address_or_pin) {
+    _comms_mode = comms_mode;
+    if (comms_mode == AB08x5_I2C_MODE) _device_address = address_or_pin;
+    if (comms_mode == AB08x5_SPI_MODE) _chip_select_pin = address_or_pin;
+    return comm_check();
+}
 
 bool AB08x5::comm_check() {
     bool success = false;
@@ -108,46 +109,36 @@ bool AB08x5::comm_check() {
     return success;
 }
 
-ab08x5_status_t AB08x5::get_status() {
-    ab08x5_status_t status;
-    read((uint8_t *)&status, AB08x5_REGISTER::STATUS);
-    return status;
-}
+///////////////////////////////////////////////////////////////////////////////
 
-ab08x5_osc_status_t AB08x5::get_oscillator_status() {
-    ab08x5_osc_status_t status;
-    read((uint8_t *)&status, AB08x5_REGISTER::OSC_STATUS);
-    return status;
-}
+void AB08x5::read_status(ab08x5_status_t *status) { read((uint8_t *)status, AB08x5_REGISTER::STATUS); }
+void AB08x5::read_status(ab08x5_osc_status_t *status) { read((uint8_t *)status, AB08x5_REGISTER::OSC_STATUS); }
+void AB08x5::read_status(ab08x5_analog_status_t *status) { read((uint8_t *)status, AB08x5_REGISTER::ANALOG_STATUS); }
+
+///////////////////////////////////////////////////////////////////////////////
 
 void AB08x5::write_config(ab08x5_control_1_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1); }
-
 void AB08x5::write_config(ab08x5_control_2_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2); }
-
 void AB08x5::write_config(ab08x5_interrupt_mask_t config) { write((uint8_t *)&config, AB08x5_REGISTER::INT_MASK); }
 void AB08x5::write_config(ab08x5_sqw_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::SQW); }
-
 void AB08x5::write_config(ab08x5_watchdog_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::WDT); }
-
 void AB08x5::write_config(ab08x5_alarm_control_t config) { write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL); }
 
-ab08x5_control_1_t AB08x5::get_control_config_1() {
-    ab08x5_control_1_t config;
-    read((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1);
-    return config;
-}
+///////////////////////////////////////////////////////////////////////////////
 
-ab08x5_control_2_t AB08x5::get_control_config_2() {
-    ab08x5_control_2_t config;
-    read((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2);
-    return config;
-}
+void AB08x5::read_config(ab08x5_control_1_t &config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1); }
+void AB08x5::read_config(ab08x5_control_2_t &config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2); }
+void AB08x5::read_config(ab08x5_interrupt_mask_t &config) { write((uint8_t *)&config, AB08x5_REGISTER::INT_MASK); }
+void AB08x5::read_config(ab08x5_sqw_config_t &config) { write((uint8_t *)&config, AB08x5_REGISTER::SQW); }
+void AB08x5::read_config(ab08x5_watchdog_config_t &config) { write((uint8_t *)&config, AB08x5_REGISTER::WDT); }
+void AB08x5::read_config(ab08x5_alarm_control_t &config) { write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL); }
 
-ab08x5_interrupt_mask_t AB08x5::get_interrupt_mask() {
-    ab08x5_interrupt_mask_t config;
-    read((uint8_t *)&config, AB08x5_REGISTER::INT_MASK);
-    return config;
+///////////////////////////////////////////////////////////////////////////////
+void AB08x5::write_ram(uint8_t *intput, uint8_t address_offset, uint8_t length) {
+    // Check that the offset is within range (I2C mode has extra space somewhere)
 }
+void AB08x5::read_ram(uint8_t *output, uint8_t address_offset, uint8_t length) {}
+///////////////////////////////////////////////////////////////////////////////
 
 DateTime AB08x5::now() {
     uint8_t buffer[7];

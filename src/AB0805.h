@@ -295,11 +295,11 @@ typedef union {
 class AB08x5 {
    public:
     bool begin(uint8_t comms_mode = AB08x5_I2C_MODE, uint8_t address_or_pin = DEFAULT_ABO8x5_ADDRESS);
-    void write_oscillator_config();
     bool comm_check();
 
-    ab08x5_status_t get_status();
-    ab08x5_osc_status_t get_oscillator_status();
+    void read_status(ab08x5_status_t* status);
+    void read_status(ab08x5_osc_status_t* status);
+    void read_status(ab08x5_analog_status_t* status);
 
     void write_config(ab08x5_control_1_t config);
     void write_config(ab08x5_control_2_t config);
@@ -308,9 +308,15 @@ class AB08x5 {
     void write_config(ab08x5_watchdog_config_t config);
     void write_config(ab08x5_alarm_control_t config);
 
-    ab08x5_control_1_t get_control_config_1();
-    ab08x5_control_2_t get_control_config_2();
-    ab08x5_interrupt_mask_t get_interrupt_mask();
+    void read_config(ab08x5_control_1_t& config);
+    void read_config(ab08x5_control_2_t& config);
+    void read_config(ab08x5_interrupt_mask_t& config);
+    void read_config(ab08x5_sqw_config_t& config);
+    void read_config(ab08x5_watchdog_config_t& config);
+    void read_config(ab08x5_alarm_control_t& config);
+
+    void write_ram(uint8_t* intput, uint8_t address_offset, uint8_t length = 1);
+    void read_ram(uint8_t* output, uint8_t address_offset, uint8_t length = 1);
 
     DateTime now();
     void adjust(DateTime& dt);
@@ -372,7 +378,7 @@ class AB08x5 {
         O_CONTROL = 0x30,
         EXTENSION_ADDRESS,
         RAM_START = 0x40,
-        I2C_ONLY_RAM = 0x80,
+        I2C_ONLY_RAM = 0x80
     } ab08x5_reg_t;
 
     uint8_t _comms_mode = AB08x5_I2C_MODE;
