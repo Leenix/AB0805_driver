@@ -1,17 +1,19 @@
 #include "AB0805.h"
 #include "ArduinoLog.h"
 
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Write to the RTC's registers.
+ *
+ * @param input: Address of data to write to the register.
+ * @param address: Address of register to write to.
+ * @return: Success/error result of the write.
+ */
 bool AB08x5::write(uint8_t *input, ab08x5_reg_t address, uint8_t length) {
     bool success = false;
     if (_comms_mode == AB08x5_I2C_MODE) success = write_i2c(input, address, length);
     if (_comms_mode == AB08x5_SPI_MODE) success = write_spi(input, address, length);
-    return success;
-}
-
-bool AB08x5::read(uint8_t *output, ab08x5_reg_t address, uint8_t length) {
-    bool success = false;
-    if (_comms_mode == AB08x5_I2C_MODE) success = read_i2c(output, address, length);
-    if (_comms_mode == AB08x5_SPI_MODE) success = read_spi(output, address, length);
     return success;
 }
 
@@ -34,6 +36,39 @@ bool AB08x5::write_i2c(uint8_t *input, ab08x5_reg_t address, uint8_t length) {
         result = false;
     }
     return result;
+}
+
+/**
+ * Write a a value to a register using SPI.
+ *
+ * @param input: Byte to write to the register.
+ * @param address: Address of register to write to.
+ * @return: Success/error result of the write.
+ */
+bool AB08x5::write_spi(uint8_t *input, ab08x5_reg_t address, uint8_t length) {
+    digitalWrite(_chip_select_pin, LOW);
+    SPI.transfer(address);
+    for (size_t i = 0; i < length; i++) {
+        SPI.transfer(input[i]);
+    }
+    digitalWrite(_chip_select_pin, HIGH);
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Read from the RTC's registers.
+ * @param output: Address to read data into.
+ * @param address: Address of the register to read data from.
+ * @param length: Number of bytes to read.
+ * @return: Success/fail of the read.
+ */
+bool AB08x5::read(uint8_t *output, ab08x5_reg_t address, uint8_t length) {
+    bool success = false;
+    if (_comms_mode == AB08x5_I2C_MODE) success = read_i2c(output, address, length);
+    if (_comms_mode == AB08x5_SPI_MODE) success = read_spi(output, address, length);
+    return success;
 }
 
 /**
@@ -60,16 +95,6 @@ bool AB08x5::read_i2c(uint8_t *output, ab08x5_reg_t address, uint8_t length) {
     return result;
 }
 
-bool AB08x5::write_spi(uint8_t *input, ab08x5_reg_t address, uint8_t length) {
-    digitalWrite(_chip_select_pin, LOW);
-    SPI.transfer(address);
-    for (size_t i = 0; i < length; i++) {
-        SPI.transfer(input[i]);
-    }
-    digitalWrite(_chip_select_pin, HIGH);
-    return true;
-}
-
 /**
  * Read a specified number of bytes using the SPI bus.
  * @param output: The buffer in which to store the read values.
@@ -93,8 +118,16 @@ bool AB08x5::read_spi(uint8_t *output, ab08x5_reg_t address, uint8_t length) {
 
     return result;
 }
+
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Start communications with the RTC.
+ *
+ * @param comms_mode: Communications mode to use to interact with the RTC [I2C, SPI]
+ * @param address_or_pin: I2C address of the RTC or CS pin connected to the RTC if using SPI mode.
+ * @return: True if communications could be started successfully.
+ */
 bool AB08x5::begin(uint8_t comms_mode, uint8_t address_or_pin) {
     _comms_mode = comms_mode;
     if (comms_mode == AB08x5_I2C_MODE) _device_address = address_or_pin;
@@ -102,6 +135,9 @@ bool AB08x5::begin(uint8_t comms_mode, uint8_t address_or_pin) {
     return comm_check();
 }
 
+/**
+ * Check communication with the RTC by reading the ID.
+ */
 bool AB08x5::comm_check() {
     bool success = false;
     uint8_t family_id;
@@ -112,22 +148,76 @@ bool AB08x5::comm_check() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Read the status from the RTC.
+ * @param status: Status object to read active status into.
+ */
 void AB08x5::read_status(ab08x5_status_t &status) { read((uint8_t *)&status, AB08x5_REGISTER::STATUS); }
+
+/**
+ * Read the status from the RTC.
+ * @param status: Status object to read active status into.
+ */
 void AB08x5::read_status(ab08x5_osc_status_t &status) { read((uint8_t *)&status, AB08x5_REGISTER::OSC_STATUS); }
+
+/**
+ * Read the status from the RTC.
+ * @param status: Status object to read active status into.
+ */
 void AB08x5::read_status(ab08x5_analog_status_t &status) { read((uint8_t *)&status, AB08x5_REGISTER::ANALOG_STATUS); }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Write to the RTC's oscillator status register.
+ * Mainly used to reset the oscillator failure flag after a loss of power or oscillator malfunction.
+ *
+ * @param status: Status object to write to the register.
+ */
 void AB08x5::write_osc_status(ab08x5_osc_status_t status) { write((uint8_t *)&status, AB08x5_REGISTER::OSC_STATUS); }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Write a configuration to the RTC.
+ * @param config: Configuration object to write to the RTC.
+ */
 void AB08x5::write_config(ab08x5_control_1_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1); }
+
+/**
+ * Write a configuration to the RTC.
+ * @param config: Configuration object to write to the RTC.
+ */
 void AB08x5::write_config(ab08x5_control_2_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2); }
+
+/**
+ * Write a configuration to the RTC.
+ * @param config: Configuration object to write to the RTC.
+ */
 void AB08x5::write_config(ab08x5_interrupt_mask_t config) { write((uint8_t *)&config, AB08x5_REGISTER::INT_MASK); }
+
+/**
+ * Write a configuration to the RTC.
+ * @param config: Configuration object to write to the RTC.
+ */
 void AB08x5::write_config(ab08x5_sqw_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::SQW); }
+
+/**
+ * Write a configuration to the RTC.
+ * @param config: Configuration object to write to the RTC.
+ */
 void AB08x5::write_config(ab08x5_watchdog_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::WDT); }
+
+/**
+ * Write a configuration to the RTC.
+ * @param config: Configuration object to write to the RTC.
+ */
 void AB08x5::write_config(ab08x5_alarm_control_t config) { write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL); }
+
+/**
+ * Write a configuration to the RTC.
+ * @param config: Configuration object to write to the RTC.
+ */
 void AB08x5::write_config(ab08x5_osc_control_t config) {
     unlock_oscillator_registers();
     write((uint8_t *)&config, AB08x5_REGISTER::OSC_CONTROL);
@@ -289,7 +379,11 @@ void AB08x5::disable_alarm() {
 }
 
 /**
- * Transform
+ * Transform an array of read registers from the RTC into a DateTime object.
+ * This function should only be used internally.
+ *
+ * @param dt: DateTime object to read the information into.
+ * @param input: Starting address of the array containing the counter register information.
  */
 void AB08x5::registers_to_datetime(DateTime &dt, uint8_t *input) {
     uint32_t micros = bcd_to_bin(input[0]) * 10000;
@@ -303,6 +397,13 @@ void AB08x5::registers_to_datetime(DateTime &dt, uint8_t *input) {
     dt = DateTime(year, month, date, hours, minutes, seconds, micros);
 }
 
+/**
+ * Transform a DateTime object into register format, ready to be written to the RTC.
+ * This function should only be used internally.
+ *
+ * @param dt: DateTime object to read the information from.
+ * @param input: Starting address of the array containing the counter register information to write to.
+ */
 void AB08x5::datetime_to_registers(DateTime &dt, uint8_t *output) {
     output[0] = bin_to_bcd(dt.hundredth());
     output[1] = bin_to_bcd(dt.second());
@@ -314,8 +415,18 @@ void AB08x5::datetime_to_registers(DateTime &dt, uint8_t *output) {
     output[7] = bin_to_bcd(dt.day_of_the_week());
 }
 
+/**
+ * Get the timestamp of the last time the RTC was updated.
+ * @return: DateTime object containing the last update time of the RTC.
+ */
 DateTime AB08x5::get_last_update_time() { return DateTime(_last_time_update); }
 
+/**
+ * Enable writing to the RTC's counter registers.
+ * Used to set the time on the RTC.
+ *
+ * This function should only be used internally.
+ */
 void AB08x5::unlock_time_registers() {
     ab08x5_control_1_t config;
     read_config(config);
@@ -323,6 +434,12 @@ void AB08x5::unlock_time_registers() {
     write_config(config);
 }
 
+/**
+ * Disable writing to the RTC's counter registers.
+ * Used to prevent changes to the set time on the RTC.
+ *
+ * This function should only be used internally.
+ */
 void AB08x5::lock_time_registers() {
     ab08x5_control_1_t config;
     read_config(config);
@@ -330,12 +447,35 @@ void AB08x5::lock_time_registers() {
     write_config(config);
 }
 
+/**
+ * Enable writing to the RTC's oscillator control register.
+ *
+ * This function should only be used internally.
+ */
 void AB08x5::unlock_oscillator_registers() { write_config_key(UNLOCK_OSC_CONTROL); }
 
+/**
+ * Disable writing to the RTC's oscillator control register.
+ *
+ * This function should only be used internally.
+ */
 void AB08x5::lock_oscillator_registers() { write_config_key(LOCK_SPECIAL_CONFIG); }
 
+/**
+ * Write a configuration key to the RTC.
+ * Configuration keys can enable writing to the oscillator control and other special configuration registers.
+ * Writing the reset key can also reset the internal memory of the RTC.
+ *
+ * This function should only be used internally.
+ */
 void AB08x5::write_config_key(ab08x5_config_key_t key) { write((uint8_t *)&key, CONFIG_KEY); }
 
+/**
+ * Enable alarm interrupts on the specified output pin.
+ * Enabling interrupts on a pin will overwrite the pin's previous configuration.
+ *
+ * @param output_pin: Pin to trigger alarm interrupts on. [nIRQ1 or nIRQ2]
+ */
 void AB08x5::enable_alarm_interrupts(uint8_t output_pin) {
     // Map the alarm interrupt to nIRQ1
     ab08x5_control_2_t config;
@@ -351,6 +491,20 @@ void AB08x5::enable_alarm_interrupts(uint8_t output_pin) {
     write_config(int_mask);
 }
 
+/**
+ * Get an ID from one of the RTC's registers
+ *
+ * ID numbers are contained in the following structure:
+ * ID0  Part Number (0x08)
+ * ID1  Part Number (0x05 or 0x15)
+ * ID2  Part revision
+ * ID3  Lot number
+ * ID4  Unique ID (LSB)
+ * ID5  Unique ID (MSB)
+ * ID6  Wafer ID
+ *
+ * @param id_number: ID register to get the data from [0-6].
+ */
 uint8_t AB08x5::get_id(uint8_t id_number) {
     id_number = constrain(id_number, 0, 6);
     ab08x5_reg_t reg_address = ab08x5_reg_t(ID0 + id_number);
