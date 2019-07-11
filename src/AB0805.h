@@ -456,9 +456,9 @@ class AB08x5 {
     void lock_time_registers();
 
     // Oscillator configuration write control
+    void write_config_key(ab08x5_config_key_t key);
     void unlock_oscillator_registers();
     void lock_oscillator_registers();
-    void write_config_key(ab08x5_config_key_t key);
 
     // DateTime x RTC register conversions
     static void datetime_to_registers(DateTime& dt, uint8_t* output);

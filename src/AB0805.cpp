@@ -226,12 +226,46 @@ void AB08x5::write_config(ab08x5_osc_control_t config) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * Read a configuration from the RTC.
+ * @param config: Configuration object to read the active configuration into.
+ */
 void AB08x5::read_config(ab08x5_control_1_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1); }
+
+/**
+ * Read a configuration from the RTC.
+ * @param config: Configuration object to read the active configuration into.
+ */
 void AB08x5::read_config(ab08x5_control_2_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2); }
+
+/**
+ * Read a configuration from the RTC.
+ * @param config: Configuration object to read the active configuration into.
+ */
 void AB08x5::read_config(ab08x5_interrupt_mask_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::INT_MASK); }
+
+/**
+ * Read a configuration from the RTC.
+ * @param config: Configuration object to read the active configuration into.
+ */
 void AB08x5::read_config(ab08x5_sqw_config_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::SQW); }
+
+/**
+ * Read a configuration from the RTC.
+ * @param config: Configuration object to read the active configuration into.
+ */
 void AB08x5::read_config(ab08x5_watchdog_config_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::WDT); }
+
+/**
+ * Read a configuration from the RTC.
+ * @param config: Configuration object to read the active configuration into.
+ */
 void AB08x5::read_config(ab08x5_alarm_control_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL); }
+
+/**
+ * Read a configuration from the RTC.
+ * @param config: Configuration object to read the active configuration into.
+ */
 void AB08x5::read_config(ab08x5_osc_control_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::OSC_CONTROL); }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -326,6 +360,40 @@ void AB08x5::adjust_to_compile_time() {
 }
 
 /**
+ * Get the timestamp of the last time the RTC was updated.
+ * @return: DateTime object containing the last update time of the RTC.
+ */
+DateTime AB08x5::get_last_update_time() { return DateTime(_last_time_update); }
+
+/**
+ * Enable writing to the RTC's counter registers.
+ * Used to set the time on the RTC.
+ *
+ * This function should only be used internally.
+ */
+void AB08x5::unlock_time_registers() {
+    ab08x5_control_1_t config;
+    read_config(config);
+    config.time_registers_write_enabled = true;
+    write_config(config);
+}
+
+/**
+ * Disable writing to the RTC's counter registers.
+ * Used to prevent changes to the set time on the RTC.
+ *
+ * This function should only be used internally.
+ */
+void AB08x5::lock_time_registers() {
+    ab08x5_control_1_t config;
+    read_config(config);
+    config.time_registers_write_enabled = false;
+    write_config(config);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/**
  * Set the RTC's alarm registers to the given time.
  * The RTC will generate and interrupt when the current time matches the alarm if configured.
  * Alarm configuration is set in // TODO - find alarm references
@@ -379,6 +447,53 @@ void AB08x5::disable_alarm() {
 }
 
 /**
+ * Enable alarm interrupts on the specified output pin.
+ * Enabling interrupts on a pin will overwrite the pin's previous configuration.
+ *
+ * @param output_pin: Pin to trigger alarm interrupts on. [nIRQ1 or nIRQ2]
+ */
+void AB08x5::enable_alarm_interrupts(uint8_t output_pin) {
+    // Map the alarm interrupt to nIRQ1
+    ab08x5_control_2_t config;
+    read_config(config);
+    if (output_pin == AB08x5_NIRQ) config.nirq_mode = AB08x5_NIRQ_MODE_NAIRQ;
+    if (output_pin == AB08x5_NIRQ2) config.nirq2_mode = AB08x5_NIRQ_MODE_NAIRQ;
+    write_config(config);
+
+    // Set level interrupts for the alarm (low until cleared)
+    ab08x5_interrupt_mask_t int_mask;
+    int_mask.alarm_interrupt_output_mode = AB08x5_ALARM_INTERRUPT_MODE::AB08x5_INTERRUPT_LATCHED;
+    int_mask.alarm_interrupt_enabled = true;
+    write_config(int_mask);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Get an ID from one of the RTC's registers
+ *
+ * ID numbers are contained in the following structure:
+ * ID0  Part Number (0x08)
+ * ID1  Part Number (0x05 or 0x15)
+ * ID2  Part revision
+ * ID3  Lot number
+ * ID4  Unique ID (LSB)
+ * ID5  Unique ID (MSB)
+ * ID6  Wafer ID
+ *
+ * @param id_number: ID register to get the data from [0-6].
+ */
+uint8_t AB08x5::get_id(uint8_t id_number) {
+    id_number = constrain(id_number, 0, 6);
+    ab08x5_reg_t reg_address = ab08x5_reg_t(ID0 + id_number);
+    uint8_t output;
+    read(&output, reg_address);
+    return output;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/**
  * Transform an array of read registers from the RTC into a DateTime object.
  * This function should only be used internally.
  *
@@ -415,37 +530,16 @@ void AB08x5::datetime_to_registers(DateTime &dt, uint8_t *output) {
     output[7] = bin_to_bcd(dt.day_of_the_week());
 }
 
-/**
- * Get the timestamp of the last time the RTC was updated.
- * @return: DateTime object containing the last update time of the RTC.
- */
-DateTime AB08x5::get_last_update_time() { return DateTime(_last_time_update); }
+///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Enable writing to the RTC's counter registers.
- * Used to set the time on the RTC.
+ * Write a configuration key to the RTC.
+ * Configuration keys can enable writing to the oscillator control and other special configuration registers.
+ * Writing the reset key can also reset the internal memory of the RTC.
  *
  * This function should only be used internally.
  */
-void AB08x5::unlock_time_registers() {
-    ab08x5_control_1_t config;
-    read_config(config);
-    config.time_registers_write_enabled = true;
-    write_config(config);
-}
-
-/**
- * Disable writing to the RTC's counter registers.
- * Used to prevent changes to the set time on the RTC.
- *
- * This function should only be used internally.
- */
-void AB08x5::lock_time_registers() {
-    ab08x5_control_1_t config;
-    read_config(config);
-    config.time_registers_write_enabled = false;
-    write_config(config);
-}
+void AB08x5::write_config_key(ab08x5_config_key_t key) { write((uint8_t *)&key, CONFIG_KEY); }
 
 /**
  * Enable writing to the RTC's oscillator control register.
@@ -460,55 +554,3 @@ void AB08x5::unlock_oscillator_registers() { write_config_key(UNLOCK_OSC_CONTROL
  * This function should only be used internally.
  */
 void AB08x5::lock_oscillator_registers() { write_config_key(LOCK_SPECIAL_CONFIG); }
-
-/**
- * Write a configuration key to the RTC.
- * Configuration keys can enable writing to the oscillator control and other special configuration registers.
- * Writing the reset key can also reset the internal memory of the RTC.
- *
- * This function should only be used internally.
- */
-void AB08x5::write_config_key(ab08x5_config_key_t key) { write((uint8_t *)&key, CONFIG_KEY); }
-
-/**
- * Enable alarm interrupts on the specified output pin.
- * Enabling interrupts on a pin will overwrite the pin's previous configuration.
- *
- * @param output_pin: Pin to trigger alarm interrupts on. [nIRQ1 or nIRQ2]
- */
-void AB08x5::enable_alarm_interrupts(uint8_t output_pin) {
-    // Map the alarm interrupt to nIRQ1
-    ab08x5_control_2_t config;
-    read_config(config);
-    if (output_pin == AB08x5_NIRQ) config.nirq_mode = AB08x5_NIRQ_MODE_NAIRQ;
-    if (output_pin == AB08x5_NIRQ2) config.nirq2_mode = AB08x5_NIRQ_MODE_NAIRQ;
-    write_config(config);
-
-    // Set level interrupts for the alarm (low until cleared)
-    ab08x5_interrupt_mask_t int_mask;
-    int_mask.alarm_interrupt_output_mode = AB08x5_ALARM_INTERRUPT_MODE::AB08x5_INTERRUPT_LATCHED;
-    int_mask.alarm_interrupt_enabled = true;
-    write_config(int_mask);
-}
-
-/**
- * Get an ID from one of the RTC's registers
- *
- * ID numbers are contained in the following structure:
- * ID0  Part Number (0x08)
- * ID1  Part Number (0x05 or 0x15)
- * ID2  Part revision
- * ID3  Lot number
- * ID4  Unique ID (LSB)
- * ID5  Unique ID (MSB)
- * ID6  Wafer ID
- *
- * @param id_number: ID register to get the data from [0-6].
- */
-uint8_t AB08x5::get_id(uint8_t id_number) {
-    id_number = constrain(id_number, 0, 6);
-    ab08x5_reg_t reg_address = ab08x5_reg_t(ID0 + id_number);
-    uint8_t output;
-    read(&output, reg_address);
-    return output;
-}
