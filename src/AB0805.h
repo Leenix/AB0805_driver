@@ -434,7 +434,7 @@ class AB08x5 {
         UNLOCK_BATTERY_CONTROL = 0x9D
     } ab08x5_config_key_t;
 
-    enum AB08x5_RAM_SPACES { RAM_START = 0x40, NORMAL_RAM_END = 0x7F, I2C_MODE_RAM_END = 0xFF };
+    enum AB08x5_RAM_SPACES { NORMAL_RAM_START = 0x40, NORMAL_RAM_END = 0x7F, I2C_MODE_RAM_END = 0xFF };
 
     uint8_t _comms_mode = AB08x5_I2C_MODE;
     DateTime _last_time_update;
