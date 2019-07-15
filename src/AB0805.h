@@ -354,7 +354,7 @@ class AB08x5 {
     void read_config(ab08x5_osc_control_t& config);
 
     // Read or write from the RTC user RAM space
-    bool write_ram(uint8_t* intput, uint8_t address_offset, uint8_t size = 1);
+    bool write_ram(uint8_t* input, uint8_t address_offset, uint8_t size = 1);
     bool read_ram(uint8_t* output, uint8_t address_offset, uint8_t size = 1);
 
     // Time control
