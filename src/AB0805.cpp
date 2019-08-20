@@ -338,7 +338,7 @@ DateTime AB08x5::now() {
  *
  * @param dt: DateTime to set the RTC's clock to.
  */
-void AB08x5::adjust(DateTime &dt) {
+void AB08x5::adjust(DateTime dt) {
     uint8_t buffer[8];
     datetime_to_registers(dt, buffer);
 
@@ -400,23 +400,26 @@ void AB08x5::lock_time_registers() {
  *
  * @param dt: DateTime object to set the alarm to.
  */
-void AB08x5::set_alarm(DateTime &dt) {
+void AB08x5::set_alarm(DateTime dt) {
     uint8_t buffer[8];
     datetime_to_registers(dt, buffer);
-    write(buffer, AB08x5_REGISTER::HUNDREDTHS_ALARM, 8);
+
+    // The alarm register does not have years, so move weekdays up
+    buffer[6] = buffer[7];
+
+    write(buffer, AB08x5_REGISTER::HUNDREDTHS_ALARM, 7);
 }
 
 /**
  * Read the current alarm time from the RTC.
  * @return: Alarm date and time as a DateTime object.
  */
-DateTime AB08x5::read_alarm(DateTime &dt) {
-    uint8_t buffer[8];
-    DateTime now;
+void AB08x5::read_alarm(DateTime &dt) {
+    uint8_t buffer[7];
 
-    read(buffer, AB08x5_REGISTER::HUNDREDTHS_ALARM, 8);
-    registers_to_datetime(now, buffer);
-    return now;
+    read(buffer, AB08x5_REGISTER::HUNDREDTHS_ALARM, 6);
+    buffer[6] = bin_to_bcd(now().year() - AB08x5_YEAR_OFFSET);
+    registers_to_datetime(dt, buffer);
 }
 
 /**
@@ -519,7 +522,7 @@ void AB08x5::registers_to_datetime(DateTime &dt, uint8_t *input) {
  * @param dt: DateTime object to read the information from.
  * @param input: Starting address of the array containing the counter register information to write to.
  */
-void AB08x5::datetime_to_registers(DateTime &dt, uint8_t *output) {
+void AB08x5::datetime_to_registers(DateTime dt, uint8_t *output) {
     output[0] = bin_to_bcd(dt.hundredth());
     output[1] = bin_to_bcd(dt.second());
     output[2] = bin_to_bcd(dt.minute());

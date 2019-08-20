@@ -216,13 +216,20 @@ typedef union {
 
 enum AB08x5_ALARM_REPEAT_MODE {
     AB08x5_ALARM_DISABLED = 0,
-    AB08x5_ALARM_PER_YEAR = 1,    // Hundredths, seconds, minutes, hours, date, and month match
-    AB08x5_ALARM_PER_MONTH = 2,   // Hundredths, seconds, minutes, hours, and date match
-    AB08x5_ALARM_PER_WEEK = 3,    // Hundredths, seconds, minutes, hours, and weekday match
-    AB08x5_ALARM_PER_DAY = 4,     // Hundredths, seconds, minutes, and hours match
-    AB08x5_ALARM_PER_HOUR = 5,    // Hundredths, seconds, and minutes match
-    AB08x5_ALARM_PER_MINUTE = 6,  // Hundredths, and seconds match
-    AB08x5_ALARM_PER_SECOND = 7,  // Hundredths match exactly or according to mask.
+    AB08x5_ALARM_PER_YEAR = 1,         // Hundredths, seconds, minutes, hours, date, and month match
+    AB08x5_ALARM_MATCH_MD_HMS = 1,     // Hundredths, seconds, minutes, hours, date, and month match
+    AB08x5_ALARM_PER_MONTH = 2,        // Hundredths, seconds, minutes, hours, and date match
+    AB08x5_ALARM_MATCH_D_HMS = 2,      // Hundredths, seconds, minutes, hours, and date match
+    AB08x5_ALARM_PER_WEEK = 3,         // Hundredths, seconds, minutes, hours, and weekday match
+    AB08x5_ALARM_MATCH_WD_HMS = 3,     // Hundredths, seconds, minutes, hours, and weekday match
+    AB08x5_ALARM_PER_DAY = 4,          // Hundredths, seconds, minutes, and hours match
+    AB08x5_ALARM_MATCH_HMS = 4,        // Hundredths, seconds, minutes, and hours match
+    AB08x5_ALARM_PER_HOUR = 5,         // Hundredths, seconds, and minutes match
+    AB08x5_ALARM_MATCH_MS = 5,         // Hundredths, seconds, and minutes match
+    AB08x5_ALARM_PER_MINUTE = 6,       // Hundredths, and seconds match
+    AB08x5_ALARM_MATCH_SECONDS = 6,    // Hundredths, and seconds match
+    AB08x5_ALARM_PER_SECOND = 7,       // Hundredths match exactly or according to mask.
+    AB08x5_ALARM_MATCH_HUNDREDTHS = 7  // Hundredths match exactly or according to mask.
     // A hundredths in the alarm register of 0xFn will trigger every 100ms, when n matches.
     // A value of 0xFF in the hundredths register will trigger the alarm every 10ms.
 };
@@ -359,13 +366,13 @@ class AB08x5 {
 
     // Time control
     DateTime now();
-    void adjust(DateTime& dt);
+    void adjust(DateTime dt);
     void adjust_to_compile_time();
     DateTime get_last_update_time();
 
     // Alarm control
-    void set_alarm(DateTime& dt);
-    DateTime read_alarm(DateTime& dt);
+    void set_alarm(DateTime dt);
+    void read_alarm(DateTime& dt);
     void enable_alarm(uint8_t alarm_repeat_mode = AB08x5_ALARM_PER_SECOND);
     void disable_alarm();
     void enable_alarm_interrupts(uint8_t output_pin = AB08x5_NIRQ);
@@ -461,7 +468,7 @@ class AB08x5 {
     void lock_oscillator_registers();
 
     // DateTime x RTC register conversions
-    static void datetime_to_registers(DateTime& dt, uint8_t* output);
+    static void datetime_to_registers(DateTime dt, uint8_t* output);
     static void registers_to_datetime(DateTime& dt, uint8_t* input);
     static uint8_t bcd_to_bin(uint8_t val) { return val - 6 * (val >> 4); }
     static uint8_t bin_to_bcd(uint8_t val) { return val + 6 * (val / 10); }
