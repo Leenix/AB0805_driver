@@ -6,7 +6,7 @@
 #ifndef AB08x5_H
 #define AB08x5_H
 
-const uint8_t DEFAULT_ABO8x5_ADDRESS = 0x69;
+const uint8_t DEFAULT_AB08x5_ADDRESS = 0x69;
 const uint16_t AB08x5_YEAR_OFFSET = 2000;
 
 enum AB08x5_WATCHDOG_FREQ {
@@ -331,7 +331,7 @@ typedef union {
 
 class AB08x5 {
    public:
-    bool begin(uint8_t comms_mode = AB08x5_I2C_MODE, uint8_t address_or_pin = DEFAULT_ABO8x5_ADDRESS);
+    bool begin(uint8_t comms_mode = AB08x5_I2C_MODE, uint8_t address_or_pin = DEFAULT_AB08x5_ADDRESS);
     bool comm_check();
 
     // Read one of the RTC's status registers
@@ -445,7 +445,7 @@ class AB08x5 {
 
     uint8_t _comms_mode = AB08x5_I2C_MODE;
     DateTime _last_time_update;
-    uint8_t _device_address = DEFAULT_ABO8x5_ADDRESS;
+    uint8_t _device_address = DEFAULT_AB08x5_ADDRESS;
     uint8_t _chip_select_pin = 0;
 
     // Write to registers
