@@ -169,6 +169,15 @@ void AB08x5::read_status(ab08x5_analog_status_t &status) { read((uint8_t *)&stat
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
+ * Write to the RTC status register.
+ * Needed to manually disable interrupt signals.
+ * @param status: Status object to be written
+ */
+void AB08x5::write_status(ab08x5_status_t status) { write((uint8_t *)&status, AB08x5_REGISTER::STATUS); }
+
+///////////////////////////////////////////////////////////////////////////////
+
+/**
  * Write to the RTC's oscillator status register.
  * Mainly used to reset the oscillator failure flag after a loss of power or oscillator malfunction.
  *
