@@ -341,6 +341,7 @@ class AB08x5 {
 
     // Write to the status registers
     void write_status(ab08x5_status_t status);
+    void write_status(ab08x5_osc_status_t status);
 
     // Write to the RTC's oscillator status register (usually to clear power failure flag)
     void write_osc_status(ab08x5_osc_status_t status);

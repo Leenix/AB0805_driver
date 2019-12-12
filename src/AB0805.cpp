@@ -1,5 +1,4 @@
 #include "AB0805.h"
-#include "ArduinoLog.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -143,6 +142,9 @@ bool AB08x5::comm_check() {
     uint8_t family_id;
     read(&family_id, AB08x5_REGISTER::ID0);
     if (family_id == 0x08) success = true;
+
+    // Log.warning(F("RTC Comms check: %X (== 0x08: %T)\n"), family_id, success);
+
     return success;
 }
 
@@ -175,6 +177,16 @@ void AB08x5::read_status(ab08x5_analog_status_t &status) { read((uint8_t *)&stat
  */
 void AB08x5::write_status(ab08x5_status_t status) { write((uint8_t *)&status, AB08x5_REGISTER::STATUS); }
 
+/**
+ * Write to the RTC status register.
+ * @param status: Status object to be written
+ */
+void AB08x5::write_status(ab08x5_osc_status_t status) {
+    unlock_oscillator_registers();
+    write((uint8_t *)&status, AB08x5_REGISTER::OSC_STATUS);
+    lock_oscillator_registers();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -183,7 +195,11 @@ void AB08x5::write_status(ab08x5_status_t status) { write((uint8_t *)&status, AB
  *
  * @param status: Status object to write to the register.
  */
-void AB08x5::write_osc_status(ab08x5_osc_status_t status) { write((uint8_t *)&status, AB08x5_REGISTER::OSC_STATUS); }
+void AB08x5::write_osc_status(ab08x5_osc_status_t status) {
+    unlock_oscillator_registers();
+    write((uint8_t *)&status, AB08x5_REGISTER::OSC_STATUS);
+    lock_oscillator_registers();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
