@@ -237,7 +237,15 @@ void AB08x5::write_config(ab08x5_watchdog_config_t config) { write((uint8_t *)&c
  * Write a configuration to the RTC.
  * @param config: Configuration object to write to the RTC.
  */
-void AB08x5::write_config(ab08x5_alarm_control_t config) { write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL); }
+void AB08x5::write_config(ab08x5_countdown_alarm_control_t config) {
+    write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL);
+}
+
+void AB08x5::write_config(ab08x5_countdown_time_t config) { write((uint8_t *)&config, AB08x5_REGISTER::TIMER); }
+
+void AB08x5::write_config(ab08x5_countdown_initial_time_t config) {
+    write((uint8_t *)&config, AB08x5_REGISTER::TIMER_INITIAL);
+}
 
 /**
  * Write a configuration to the RTC.
@@ -285,7 +293,23 @@ void AB08x5::read_config(ab08x5_watchdog_config_t &config) { read((uint8_t *)&co
  * Read a configuration from the RTC.
  * @param config: Configuration object to read the active configuration into.
  */
-void AB08x5::read_config(ab08x5_alarm_control_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL); }
+void AB08x5::read_config(ab08x5_countdown_alarm_control_t &config) {
+    read((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL);
+}
+
+/**
+ * Read a configuration from the RTC.
+ * @param config: Configuration object to read the active configuration into.
+ */
+void AB08x5::read_config(ab08x5_countdown_time_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::TIMER); }
+
+/**
+ * Read a configuration from the RTC.
+ * @param config: Configuration object to read the active configuration into.
+ */
+void AB08x5::read_config(ab08x5_countdown_initial_time_t &config) {
+    read((uint8_t *)&config, AB08x5_REGISTER::TIMER_INITIAL);
+}
 
 /**
  * Read a configuration from the RTC.
@@ -458,7 +482,7 @@ void AB08x5::read_alarm(DateTime &dt) {
  * @param alarm_repeat_mode: Repeat mode of the alarm (see AB08x5_ALARM_REPEAT_MODE)
  */
 void AB08x5::enable_alarm(uint8_t alarm_repeat_mode) {
-    ab08x5_alarm_control_t config;
+    ab08x5_countdown_alarm_control_t config;
     read((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL);
     config.alarm_repeat_mode = alarm_repeat_mode;
     write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL);
@@ -468,7 +492,7 @@ void AB08x5::enable_alarm(uint8_t alarm_repeat_mode) {
  * Disable alarm interrupts from occurring.
  */
 void AB08x5::disable_alarm() {
-    ab08x5_alarm_control_t config;
+    ab08x5_countdown_alarm_control_t config;
     read((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL);
     config.alarm_repeat_mode = AB08x5_ALARM_DISABLED;
     write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL);

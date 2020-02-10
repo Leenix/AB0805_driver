@@ -1,6 +1,6 @@
 #include "DateTime.h"
 
-const char* TIMESTAMP_FORMAT = "%4d-%02d-%02d_%02d:%02d:%02d.%06d";
+const char* TIMESTAMP_FORMAT = "%4u-%02u-%02u_%02u:%02u:%02u.%06u";
 const uint8_t DAYS_IN_MONTH[] PROGMEM = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 // number of days since 2000/01/01, valid for 2001..2099
@@ -39,8 +39,8 @@ DateTime::DateTime(uint32_t t, int32_t micros) {
     hh = t % 24;
     uint16_t days = t / 24;
     uint8_t leap;
-    for (yOff = 0;; ++yOff) {
-        leap = yOff % 4 == 0;
+    for (this->yOff = 0;; this->yOff++) {
+        leap = this->yOff % 4 == 0;
         if (days < 365 + leap) break;
         days -= 365 + leap;
     }

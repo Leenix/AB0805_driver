@@ -212,6 +212,38 @@ typedef union {
 } ab08x5_exti_polarity_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+// COUNTDOWN_TIMER_CONTROL
+
+enum AB08x5_TIMER_FREQUENCY_32KHZ_OSC {
+    AB08x5_COUNTDOWN_FREQUENCY_4KHZ = 0,
+    AB08x5_COUNTDOWN_FREQUENCY_64HZ = 1,
+    AB08x5_COUNTDOWN_FREQUENCY_1HZ = 2,
+    AB08x5_COUNTDOWN_FREQUENCY_0167HZ = 3
+};
+enum AB08x5_TIMER_FREQUENCY_128HZ_OSC {
+    AB08x5_COUNTDOWN_FREQUENCY_128HZ = 0,
+};
+
+enum AB08x5_TIMER_INTERRUPT_WIDTH {
+    AB08x5_COUNTDOWN_INTERRUPT_WIDTH_200US = 0,
+    AB08x5_COUNTDOWN_INTERRUPT_WIDTH_8MS = 1,
+    AB08x5_COUNTDOWN_INTERRUPT_WIDTH_16MS = 2,
+};
+
+enum AB08x5_TIMER_INTERRUPT_MODE {
+    AB08x5_TIMER_NORMAL_INTERRUPT_WIDTH = 0,
+    AB08x5_TIMER_MINIMAL_OR_LEVEL_INTERRUPT = 1
+};
+
+typedef union {
+    uint8_t active_time;
+} ab08x5_countdown_time_t;
+
+typedef union {
+    uint8_t initial_time;
+} ab08x5_countdown_initial_time_t;
+
+///////////////////////////////////////////////////////////////////////////////
 // INTERRUPT_MASK
 
 enum AB08x5_ALARM_REPEAT_MODE {
@@ -237,13 +269,13 @@ enum AB08x5_ALARM_REPEAT_MODE {
 typedef union {
     uint8_t raw;
     struct {
-        uint8_t timer_interrupt_pulse_width : 2;
+        uint8_t timer_frequency_and_pulse_width : 2;
         uint8_t alarm_repeat_mode : 3;
-        uint8_t timer_repeat : 1;
+        uint8_t timer_repeat_enable : 1;
         uint8_t timer_interrupt_mode : 1;
         uint8_t timer_enable : 1;
     };
-} ab08x5_alarm_control_t;
+} ab08x5_countdown_alarm_control_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 // INTERRUPT_MASK
@@ -258,7 +290,8 @@ typedef union {
 } ab08x5_watchdog_config_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-// INTERRUPT_MASK
+
+// OSC_CONTROL
 
 typedef union {
     uint8_t raw;
@@ -274,7 +307,7 @@ typedef union {
 } ab08x5_osc_control_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-// INTERRUPT_MASK
+// OSC_STATUS
 
 typedef union {
     uint8_t raw;
@@ -289,7 +322,7 @@ typedef union {
 } ab08x5_osc_status_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-// INTERRUPT_MASK
+// TRICKLE_CONFIG
 
 typedef union {
     uint8_t raw;
@@ -301,7 +334,7 @@ typedef union {
 } ab08x5_trickle_config_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-// INTERRUPT_MASK
+// OUTPUT_CONTROL
 
 typedef union {
     uint8_t raw;
@@ -313,7 +346,7 @@ typedef union {
 } ab08x5_output_control_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-// INTERRUPT_MASK
+// ANALOG_STATUS
 
 typedef union {
     uint8_t raw;
@@ -327,7 +360,6 @@ typedef union {
 } ab08x5_analog_status_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-// INTERRUPT_MASK
 
 class AB08x5 {
    public:
@@ -352,8 +384,10 @@ class AB08x5 {
     void write_config(ab08x5_interrupt_mask_t config);
     void write_config(ab08x5_sqw_config_t config);
     void write_config(ab08x5_watchdog_config_t config);
-    void write_config(ab08x5_alarm_control_t config);
+    void write_config(ab08x5_countdown_alarm_control_t config);
     void write_config(ab08x5_osc_control_t config);
+    void write_config(ab08x5_countdown_time_t config);
+    void write_config(ab08x5_countdown_initial_time_t config);
 
     // Read a configuration register from the RTC
     void read_config(ab08x5_control_1_t& config);
@@ -361,8 +395,10 @@ class AB08x5 {
     void read_config(ab08x5_interrupt_mask_t& config);
     void read_config(ab08x5_sqw_config_t& config);
     void read_config(ab08x5_watchdog_config_t& config);
-    void read_config(ab08x5_alarm_control_t& config);
+    void read_config(ab08x5_countdown_alarm_control_t& config);
     void read_config(ab08x5_osc_control_t& config);
+    void read_config(ab08x5_countdown_time_t& config);
+    void read_config(ab08x5_countdown_initial_time_t& config);
 
     // Read or write from the RTC user RAM space
     bool write_ram(uint8_t* input, uint8_t address_offset, uint8_t size = 1);
@@ -383,6 +419,12 @@ class AB08x5 {
 
     // Get an ID from one of the RTC's ID registers (0-6)
     uint8_t get_id(uint8_t id_number);
+
+    // Countdown timer
+    void set_countdown_timer_value(uint8_t);
+    uint8_t get_countdown_timer_value();
+    void set_countdown_timer_initial_value(uint8_t);
+    uint8_t get_countdown_timer_initial_value();
 
    private:
     /**
