@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
+
 #include "DateTime.h"
 
 #ifndef AB08x5_H
@@ -115,12 +116,7 @@ typedef union {
 ///////////////////////////////////////////////////////////////////////////////
 // INTERRUPT_MASK
 
-enum AB08x5_ALARM_INTERRUPT_MODE {
-    AB08x5_INTERRUPT_LATCHED = 0,
-    AB08x5_INTERRUPT_PULSE_MIN = 1,
-    AB08x5_INTERRUPT_PULSE_16MS = 2,
-    AB08x5_INTERRUPT_PULSE_250MS = 3
-};
+enum AB08x5_ALARM_INTERRUPT_MODE { AB08x5_INTERRUPT_LATCHED = 0, AB08x5_INTERRUPT_PULSE_MIN = 1, AB08x5_INTERRUPT_PULSE_16MS = 2, AB08x5_INTERRUPT_PULSE_250MS = 3 };
 
 typedef union {
     uint8_t raw;
@@ -214,12 +210,7 @@ typedef union {
 ///////////////////////////////////////////////////////////////////////////////
 // COUNTDOWN_TIMER_CONTROL
 
-enum AB08x5_TIMER_FREQUENCY_32KHZ_OSC {
-    AB08x5_COUNTDOWN_FREQUENCY_4KHZ = 0,
-    AB08x5_COUNTDOWN_FREQUENCY_64HZ = 1,
-    AB08x5_COUNTDOWN_FREQUENCY_1HZ = 2,
-    AB08x5_COUNTDOWN_FREQUENCY_0167HZ = 3
-};
+enum AB08x5_TIMER_FREQUENCY_32KHZ_OSC { AB08x5_COUNTDOWN_FREQUENCY_4KHZ = 0, AB08x5_COUNTDOWN_FREQUENCY_64HZ = 1, AB08x5_COUNTDOWN_FREQUENCY_1HZ = 2, AB08x5_COUNTDOWN_FREQUENCY_0167HZ = 3 };
 enum AB08x5_TIMER_FREQUENCY_128HZ_OSC {
     AB08x5_COUNTDOWN_FREQUENCY_128HZ = 0,
 };
@@ -230,10 +221,7 @@ enum AB08x5_TIMER_INTERRUPT_WIDTH {
     AB08x5_COUNTDOWN_INTERRUPT_WIDTH_16MS = 2,
 };
 
-enum AB08x5_TIMER_INTERRUPT_MODE {
-    AB08x5_TIMER_NORMAL_INTERRUPT_WIDTH = 0,
-    AB08x5_TIMER_MINIMAL_OR_LEVEL_INTERRUPT = 1
-};
+enum AB08x5_TIMER_INTERRUPT_MODE { AB08x5_TIMER_NORMAL_INTERRUPT_WIDTH = 0, AB08x5_TIMER_MINIMAL_OR_LEVEL_INTERRUPT = 1 };
 
 typedef union {
     uint8_t active_time;
@@ -367,38 +355,35 @@ class AB08x5 {
     bool comm_check();
 
     // Read one of the RTC's status registers
-    void read_status(ab08x5_status_t& status);
-    void read_status(ab08x5_osc_status_t& status);
-    void read_status(ab08x5_analog_status_t& status);
+    void read(ab08x5_status_t& status);
+    void read(ab08x5_osc_status_t& status);
+    void read(ab08x5_analog_status_t& status);
 
     // Write to the status registers
-    void write_status(ab08x5_status_t status);
-    void write_status(ab08x5_osc_status_t status);
-
-    // Write to the RTC's oscillator status register (usually to clear power failure flag)
-    void write_osc_status(ab08x5_osc_status_t status);
+    void write(ab08x5_status_t status);
+    void write(ab08x5_osc_status_t status);
 
     // Write a configuration register to the RTC
-    void write_config(ab08x5_control_1_t config);
-    void write_config(ab08x5_control_2_t config);
-    void write_config(ab08x5_interrupt_mask_t config);
-    void write_config(ab08x5_sqw_config_t config);
-    void write_config(ab08x5_watchdog_config_t config);
-    void write_config(ab08x5_countdown_alarm_control_t config);
-    void write_config(ab08x5_osc_control_t config);
-    void write_config(ab08x5_countdown_time_t config);
-    void write_config(ab08x5_countdown_initial_time_t config);
+    void write(ab08x5_control_1_t config);
+    void write(ab08x5_control_2_t config);
+    void write(ab08x5_interrupt_mask_t config);
+    void write(ab08x5_sqw_config_t config);
+    void write(ab08x5_watchdog_config_t config);
+    void write(ab08x5_countdown_alarm_control_t config);
+    void write(ab08x5_osc_control_t config);
+    void write(ab08x5_countdown_time_t config);
+    void write(ab08x5_countdown_initial_time_t config);
 
     // Read a configuration register from the RTC
-    void read_config(ab08x5_control_1_t& config);
-    void read_config(ab08x5_control_2_t& config);
-    void read_config(ab08x5_interrupt_mask_t& config);
-    void read_config(ab08x5_sqw_config_t& config);
-    void read_config(ab08x5_watchdog_config_t& config);
-    void read_config(ab08x5_countdown_alarm_control_t& config);
-    void read_config(ab08x5_osc_control_t& config);
-    void read_config(ab08x5_countdown_time_t& config);
-    void read_config(ab08x5_countdown_initial_time_t& config);
+    void read(ab08x5_control_1_t& config);
+    void read(ab08x5_control_2_t& config);
+    void read(ab08x5_interrupt_mask_t& config);
+    void read(ab08x5_sqw_config_t& config);
+    void read(ab08x5_watchdog_config_t& config);
+    void read(ab08x5_countdown_alarm_control_t& config);
+    void read(ab08x5_osc_control_t& config);
+    void read(ab08x5_countdown_time_t& config);
+    void read(ab08x5_countdown_initial_time_t& config);
 
     // Read or write from the RTC user RAM space
     bool write_ram(uint8_t* input, uint8_t address_offset, uint8_t size = 1);
@@ -480,12 +465,7 @@ class AB08x5 {
         I2C_ONLY_RAM = 0x80
     } ab08x5_reg_t;
 
-    typedef enum AB08x5_CONFIG_KEY {
-        LOCK_SPECIAL_CONFIG = 0x00,
-        UNLOCK_OSC_CONTROL = 0xA1,
-        SOFTWARE_RESET = 0x3C,
-        UNLOCK_BATTERY_CONTROL = 0x9D
-    } ab08x5_config_key_t;
+    typedef enum AB08x5_CONFIG_KEY { LOCK_SPECIAL_CONFIG = 0x00, UNLOCK_OSC_CONTROL = 0xA1, SOFTWARE_RESET = 0x3C, UNLOCK_BATTERY_CONTROL = 0x9D } ab08x5_config_key_t;
 
     enum AB08x5_RAM_SPACES { NORMAL_RAM_START = 0x40, NORMAL_RAM_END = 0x7F, I2C_MODE_RAM_END = 0xFF };
 
@@ -509,7 +489,7 @@ class AB08x5 {
     void lock_time_registers();
 
     // Oscillator configuration write control
-    void write_config_key(ab08x5_config_key_t key);
+    void write_key(ab08x5_config_key_t key);
     void unlock_oscillator_registers();
     void lock_oscillator_registers();
 

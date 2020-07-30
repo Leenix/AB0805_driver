@@ -154,19 +154,19 @@ bool AB08x5::comm_check() {
  * Read the status from the RTC.
  * @param status: Status object to read active status into.
  */
-void AB08x5::read_status(ab08x5_status_t &status) { read((uint8_t *)&status, AB08x5_REGISTER::STATUS); }
+void AB08x5::read(ab08x5_status_t &status) { read((uint8_t *)&status, AB08x5_REGISTER::STATUS); }
 
 /**
  * Read the status from the RTC.
  * @param status: Status object to read active status into.
  */
-void AB08x5::read_status(ab08x5_osc_status_t &status) { read((uint8_t *)&status, AB08x5_REGISTER::OSC_STATUS); }
+void AB08x5::read(ab08x5_osc_status_t &status) { read((uint8_t *)&status, AB08x5_REGISTER::OSC_STATUS); }
 
 /**
  * Read the status from the RTC.
  * @param status: Status object to read active status into.
  */
-void AB08x5::read_status(ab08x5_analog_status_t &status) { read((uint8_t *)&status, AB08x5_REGISTER::ANALOG_STATUS); }
+void AB08x5::read(ab08x5_analog_status_t &status) { read((uint8_t *)&status, AB08x5_REGISTER::ANALOG_STATUS); }
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -175,27 +175,13 @@ void AB08x5::read_status(ab08x5_analog_status_t &status) { read((uint8_t *)&stat
  * Needed to manually disable interrupt signals.
  * @param status: Status object to be written
  */
-void AB08x5::write_status(ab08x5_status_t status) { write((uint8_t *)&status, AB08x5_REGISTER::STATUS); }
+void AB08x5::write(ab08x5_status_t status) { write((uint8_t *)&status, AB08x5_REGISTER::STATUS); }
 
 /**
  * Write to the RTC status register.
  * @param status: Status object to be written
  */
-void AB08x5::write_status(ab08x5_osc_status_t status) {
-    unlock_oscillator_registers();
-    write((uint8_t *)&status, AB08x5_REGISTER::OSC_STATUS);
-    lock_oscillator_registers();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-/**
- * Write to the RTC's oscillator status register.
- * Mainly used to reset the oscillator failure flag after a loss of power or oscillator malfunction.
- *
- * @param status: Status object to write to the register.
- */
-void AB08x5::write_osc_status(ab08x5_osc_status_t status) {
+void AB08x5::write(ab08x5_osc_status_t status) {
     unlock_oscillator_registers();
     write((uint8_t *)&status, AB08x5_REGISTER::OSC_STATUS);
     lock_oscillator_registers();
@@ -207,51 +193,47 @@ void AB08x5::write_osc_status(ab08x5_osc_status_t status) {
  * Write a configuration to the RTC.
  * @param config: Configuration object to write to the RTC.
  */
-void AB08x5::write_config(ab08x5_control_1_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1); }
+void AB08x5::write(ab08x5_control_1_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1); }
 
 /**
  * Write a configuration to the RTC.
  * @param config: Configuration object to write to the RTC.
  */
-void AB08x5::write_config(ab08x5_control_2_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2); }
+void AB08x5::write(ab08x5_control_2_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2); }
 
 /**
  * Write a configuration to the RTC.
  * @param config: Configuration object to write to the RTC.
  */
-void AB08x5::write_config(ab08x5_interrupt_mask_t config) { write((uint8_t *)&config, AB08x5_REGISTER::INT_MASK); }
+void AB08x5::write(ab08x5_interrupt_mask_t config) { write((uint8_t *)&config, AB08x5_REGISTER::INT_MASK); }
 
 /**
  * Write a configuration to the RTC.
  * @param config: Configuration object to write to the RTC.
  */
-void AB08x5::write_config(ab08x5_sqw_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::SQW); }
+void AB08x5::write(ab08x5_sqw_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::SQW); }
 
 /**
  * Write a configuration to the RTC.
  * @param config: Configuration object to write to the RTC.
  */
-void AB08x5::write_config(ab08x5_watchdog_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::WDT); }
+void AB08x5::write(ab08x5_watchdog_config_t config) { write((uint8_t *)&config, AB08x5_REGISTER::WDT); }
 
 /**
  * Write a configuration to the RTC.
  * @param config: Configuration object to write to the RTC.
  */
-void AB08x5::write_config(ab08x5_countdown_alarm_control_t config) {
-    write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL);
-}
+void AB08x5::write(ab08x5_countdown_alarm_control_t config) { write((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL); }
 
-void AB08x5::write_config(ab08x5_countdown_time_t config) { write((uint8_t *)&config, AB08x5_REGISTER::TIMER); }
+void AB08x5::write(ab08x5_countdown_time_t config) { write((uint8_t *)&config, AB08x5_REGISTER::TIMER); }
 
-void AB08x5::write_config(ab08x5_countdown_initial_time_t config) {
-    write((uint8_t *)&config, AB08x5_REGISTER::TIMER_INITIAL);
-}
+void AB08x5::write(ab08x5_countdown_initial_time_t config) { write((uint8_t *)&config, AB08x5_REGISTER::TIMER_INITIAL); }
 
 /**
  * Write a configuration to the RTC.
  * @param config: Configuration object to write to the RTC.
  */
-void AB08x5::write_config(ab08x5_osc_control_t config) {
+void AB08x5::write(ab08x5_osc_control_t config) {
     unlock_oscillator_registers();
     write((uint8_t *)&config, AB08x5_REGISTER::OSC_CONTROL);
     lock_oscillator_registers();
@@ -263,59 +245,55 @@ void AB08x5::write_config(ab08x5_osc_control_t config) {
  * Read a configuration from the RTC.
  * @param config: Configuration object to read the active configuration into.
  */
-void AB08x5::read_config(ab08x5_control_1_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1); }
+void AB08x5::read(ab08x5_control_1_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::CONTROL_1); }
 
 /**
  * Read a configuration from the RTC.
  * @param config: Configuration object to read the active configuration into.
  */
-void AB08x5::read_config(ab08x5_control_2_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2); }
+void AB08x5::read(ab08x5_control_2_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::CONTROL_2); }
 
 /**
  * Read a configuration from the RTC.
  * @param config: Configuration object to read the active configuration into.
  */
-void AB08x5::read_config(ab08x5_interrupt_mask_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::INT_MASK); }
+void AB08x5::read(ab08x5_interrupt_mask_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::INT_MASK); }
 
 /**
  * Read a configuration from the RTC.
  * @param config: Configuration object to read the active configuration into.
  */
-void AB08x5::read_config(ab08x5_sqw_config_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::SQW); }
+void AB08x5::read(ab08x5_sqw_config_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::SQW); }
 
 /**
  * Read a configuration from the RTC.
  * @param config: Configuration object to read the active configuration into.
  */
-void AB08x5::read_config(ab08x5_watchdog_config_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::WDT); }
+void AB08x5::read(ab08x5_watchdog_config_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::WDT); }
 
 /**
  * Read a configuration from the RTC.
  * @param config: Configuration object to read the active configuration into.
  */
-void AB08x5::read_config(ab08x5_countdown_alarm_control_t &config) {
-    read((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL);
-}
+void AB08x5::read(ab08x5_countdown_alarm_control_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL); }
 
 /**
  * Read a configuration from the RTC.
  * @param config: Configuration object to read the active configuration into.
  */
-void AB08x5::read_config(ab08x5_countdown_time_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::TIMER); }
+void AB08x5::read(ab08x5_countdown_time_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::TIMER); }
 
 /**
  * Read a configuration from the RTC.
  * @param config: Configuration object to read the active configuration into.
  */
-void AB08x5::read_config(ab08x5_countdown_initial_time_t &config) {
-    read((uint8_t *)&config, AB08x5_REGISTER::TIMER_INITIAL);
-}
+void AB08x5::read(ab08x5_countdown_initial_time_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::TIMER_INITIAL); }
 
 /**
  * Read a configuration from the RTC.
  * @param config: Configuration object to read the active configuration into.
  */
-void AB08x5::read_config(ab08x5_osc_control_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::OSC_CONTROL); }
+void AB08x5::read(ab08x5_osc_control_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::OSC_CONTROL); }
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -422,9 +400,9 @@ DateTime AB08x5::get_last_update_time() { return DateTime(_last_time_update); }
  */
 void AB08x5::unlock_time_registers() {
     ab08x5_control_1_t config;
-    read_config(config);
+    read(config);
     config.time_registers_write_enabled = true;
-    write_config(config);
+    write(config);
 }
 
 /**
@@ -435,9 +413,9 @@ void AB08x5::unlock_time_registers() {
  */
 void AB08x5::lock_time_registers() {
     ab08x5_control_1_t config;
-    read_config(config);
+    read(config);
     config.time_registers_write_enabled = false;
-    write_config(config);
+    write(config);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -482,6 +460,7 @@ void AB08x5::read_alarm(DateTime &dt) {
  * @param alarm_repeat_mode: Repeat mode of the alarm (see AB08x5_ALARM_REPEAT_MODE)
  */
 void AB08x5::enable_alarm(uint8_t alarm_repeat_mode) {
+    alarm_repeat_mode &= 0x7;
     ab08x5_countdown_alarm_control_t config;
     read((uint8_t *)&config, AB08x5_REGISTER::TIMER_CONTROL);
     config.alarm_repeat_mode = alarm_repeat_mode;
@@ -507,16 +486,16 @@ void AB08x5::disable_alarm() {
 void AB08x5::enable_alarm_interrupts(uint8_t output_pin) {
     // Map the alarm interrupt to nIRQ1
     ab08x5_control_2_t config;
-    read_config(config);
+    read(config);
     if (output_pin == AB08x5_NIRQ) config.nirq_mode = AB08x5_NIRQ_MODE_NAIRQ;
     if (output_pin == AB08x5_NIRQ2) config.nirq2_mode = AB08x5_NIRQ_MODE_NAIRQ;
-    write_config(config);
+    write(config);
 
     // Set level interrupts for the alarm (low until cleared)
     ab08x5_interrupt_mask_t int_mask;
     int_mask.alarm_interrupt_output_mode = AB08x5_ALARM_INTERRUPT_MODE::AB08x5_INTERRUPT_LATCHED;
     int_mask.alarm_interrupt_enabled = true;
-    write_config(int_mask);
+    write(int_mask);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -591,18 +570,18 @@ void AB08x5::datetime_to_registers(DateTime dt, uint8_t *output) {
  *
  * This function should only be used internally.
  */
-void AB08x5::write_config_key(ab08x5_config_key_t key) { write((uint8_t *)&key, CONFIG_KEY); }
+void AB08x5::write_key(ab08x5_config_key_t key) { write((uint8_t *)&key, CONFIG_KEY); }
 
 /**
  * Enable writing to the RTC's oscillator control register.
  *
  * This function should only be used internally.
  */
-void AB08x5::unlock_oscillator_registers() { write_config_key(UNLOCK_OSC_CONTROL); }
+void AB08x5::unlock_oscillator_registers() { write_key(UNLOCK_OSC_CONTROL); }
 
 /**
  * Disable writing to the RTC's oscillator control register.
  *
  * This function should only be used internally.
  */
-void AB08x5::lock_oscillator_registers() { write_config_key(LOCK_SPECIAL_CONFIG); }
+void AB08x5::lock_oscillator_registers() { write_key(LOCK_SPECIAL_CONFIG); }
