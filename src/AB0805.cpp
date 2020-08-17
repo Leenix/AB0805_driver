@@ -538,7 +538,7 @@ void AB08x5::registers_to_datetime(DateTime &dt, uint8_t *input) {
     uint8_t hours = bcd_to_bin(input[3] & 0x3F);
     uint8_t date = bcd_to_bin(input[4] & 0x3F);
     uint8_t month = bcd_to_bin(input[5] & 0x1F);
-    uint8_t year = bcd_to_bin(input[6] & 0x1F);
+    uint8_t year = bcd_to_bin(input[6] & 0xFF);
 
     dt = DateTime(year, month, date, hours, minutes, seconds, micros);
 }
