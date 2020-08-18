@@ -354,16 +354,26 @@ class AB08x5 {
     bool begin(uint8_t comms_mode = AB08x5_I2C_MODE, uint8_t address_or_pin = DEFAULT_AB08x5_ADDRESS);
     bool comm_check();
 
-    // Read one of the RTC's status registers
     void read(ab08x5_status_t& status);
     void read(ab08x5_osc_status_t& status);
     void read(ab08x5_analog_status_t& status);
+    void read(ab08x5_control_1_t& config);
+    void read(ab08x5_control_2_t& config);
+    void read(ab08x5_interrupt_mask_t& config);
+    void read(ab08x5_sqw_config_t& config);
+    void read(ab08x5_watchdog_config_t& config);
+    void read(ab08x5_countdown_alarm_control_t& config);
+    void read(ab08x5_osc_control_t& config);
+    void read(ab08x5_countdown_time_t& config);
+    void read(ab08x5_countdown_initial_time_t& config);
+    void read(ab08x5_xt_calibration_t& config);
+    void read(ab08x5_exti_polarity_t& config);
+    void read(ab08x5_trickle_config_t& config);
+    void read(ab08x5_output_control_t& config);
 
     // Write to the status registers
     void write(ab08x5_status_t status);
     void write(ab08x5_osc_status_t status);
-
-    // Write a configuration register to the RTC
     void write(ab08x5_control_1_t config);
     void write(ab08x5_control_2_t config);
     void write(ab08x5_interrupt_mask_t config);
@@ -374,17 +384,9 @@ class AB08x5 {
     void write(ab08x5_countdown_time_t config);
     void write(ab08x5_countdown_initial_time_t config);
     void write(ab08x5_xt_calibration_t config);
-
-    // Read a configuration register from the RTC
-    void read(ab08x5_control_1_t& config);
-    void read(ab08x5_control_2_t& config);
-    void read(ab08x5_interrupt_mask_t& config);
-    void read(ab08x5_sqw_config_t& config);
-    void read(ab08x5_watchdog_config_t& config);
-    void read(ab08x5_countdown_alarm_control_t& config);
-    void read(ab08x5_osc_control_t& config);
-    void read(ab08x5_countdown_time_t& config);
-    void read(ab08x5_countdown_initial_time_t& config);
+    void write(ab08x5_exti_polarity_t config);
+    void write(ab08x5_trickle_config_t config);
+    void write(ab08x5_output_control_t config);
 
     // Read or write from the RTC user RAM space
     bool write_ram(uint8_t* input, uint8_t address_offset, uint8_t size = 1);

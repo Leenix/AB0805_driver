@@ -241,6 +241,12 @@ void AB08x5::write(ab08x5_osc_control_t config) {
 
 void AB08x5::write(ab08x5_xt_calibration_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CAL_XT); }
 
+void AB08x5::write(ab08x5_exti_polarity_t config) { write((uin8t_t *)&config, AB08x5_REGISTER::INT_POLARITY); }
+
+void AB08x5::write(ab08x5_trickle_config_t config) { write((uin8t_t *)&config, AB08x5_REGISTER::TRICKLE); }
+
+void AB08x5::write(ab08x5_output_control_t config) { write((uin8t_t *)&config, AB08x5_REGISTER::O_CONTROL); }
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -297,6 +303,13 @@ void AB08x5::read(ab08x5_countdown_initial_time_t &config) { read((uint8_t *)&co
  */
 void AB08x5::read(ab08x5_osc_control_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::OSC_CONTROL); }
 
+void AB08x5::read(ab08x5_xt_calibration_t &config) { read((uint8_t *)&config, AB08x5_REGISTER::CAL_XT); }
+
+void AB08x5::read(ab08x5_exti_polarity_t config) { read((uin8t_t *)&config, AB08x5_REGISTER::INT_POLARITY); }
+
+void AB08x5::read(ab08x5_trickle_config_t config) { read((uin8t_t *)&config, AB08x5_REGISTER::TRICKLE); }
+
+void AB08x5::read(ab08x5_output_control_t config) { read((uin8t_t *)&config, AB08x5_REGISTER::O_CONTROL); }
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
