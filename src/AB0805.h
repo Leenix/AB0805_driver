@@ -186,8 +186,8 @@ enum AB08x5_CALIBRATION_MODE { AB08x5_CALIBRATION_2PPM = 0, AB08x5_CALIBRATION_4
 typedef union {
     uint8_t raw;
     struct {
-        uint8_t offset : 7;
-        int8_t adjust_mode : 1;
+        int8_t offset : 7;
+        uint8_t adjust_mode : 1;
     };
 } ab08x5_xt_calibration_t;
 
@@ -373,6 +373,7 @@ class AB08x5 {
     void write(ab08x5_osc_control_t config);
     void write(ab08x5_countdown_time_t config);
     void write(ab08x5_countdown_initial_time_t config);
+    void write(ab08x5_xt_calibration_t config);
 
     // Read a configuration register from the RTC
     void read(ab08x5_control_1_t& config);

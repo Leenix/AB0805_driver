@@ -239,6 +239,8 @@ void AB08x5::write(ab08x5_osc_control_t config) {
     lock_oscillator_registers();
 }
 
+void AB08x5::write(ab08x5_xt_calibration_t config) { write((uint8_t *)&config, AB08x5_REGISTER::CAL_XT); }
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
